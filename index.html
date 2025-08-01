@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link rel="stylesheet" href="css/index.css" />
+    <title>Students dashboard</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="header">Students Dashboard</h2>
+        <div class="input">
+            <input type="text" placeholder="Search Student..." id="search-input" />
+            <button id="open-popup">Add Student</button>
+        </div>
+        <div class="overlay hidden"></div>
+
+        <div class="popup-form hidden" id="student-popup">
+            <form>
+                <h2>Add New Student</h2>
+                <input type="text" id="student-name" placeholder="Name" required />
+                <input type="text" id="student-gpa" placeholder="GPA" required />
+                <input type="text" id="student-major" placeholder="Major" required />
+                <div class="popup-buttons">
+                    <button type="submit" id="save-student">Save</button>
+                    <button type="button"  id="cancel-student">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>GPA</th>
+                    <th>Major</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="confirm-popup">
+    </div>
+    <script src="js/index.js"></script>
+</body>
+
+</html>
