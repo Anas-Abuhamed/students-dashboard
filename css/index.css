@@ -6,7 +6,7 @@
 
 .container {
     width: 70%;
-    margin: 50px auto; 
+    margin: 50px auto;
     padding: 40px 20px;
     display: flex;
     align-items: center;
@@ -14,6 +14,7 @@
     background-color: #f8f8f8;
     border-radius: 12px;
 }
+
 .container table {
     width: 100%;
     border-collapse: collapse;
@@ -29,6 +30,7 @@
     justify-content: space-between;
     margin-bottom: 20px;
 }
+
 .input input {
     width: 80%;
     padding: 10px;
@@ -42,6 +44,7 @@
     outline: none;
     box-shadow: 0 0 5px #218838;
 }
+
 .input button {
     padding: 10px 20px;
     background-color: #28a745;
@@ -50,36 +53,45 @@
     border-radius: 6px;
     cursor: pointer;
     transition: 0.3s;
-    font-size: 20px;
-}   
+    font-size: 16px;
+}
 
 .input button:focus {
     outline: none;
     box-shadow: 0 0 5px #218838;
 }
+
 .input button:hover {
     background-color: #218838;
 }
-.container table th, .container table td {
+
+.container table th,
+.container table td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
+
 .container table th {
     background-color: #f2f2f2;
-}       
+}
+
 .container table tr:hover {
     background-color: #f1f1f1 !important;
 }
+
 .container table tr:nth-child(even) {
     background-color: #f9f9f9;
-}       
+}
+
 .container table tr:nth-child(odd) {
     background-color: #ffffff;
 }
+
 .container table tr td:last-child {
     text-align: center;
 }
+
 .container table tr td button {
     padding: 5px 10px;
     background-color: #007bff;
@@ -90,114 +102,151 @@
     transition: 0.3s;
 }
 
-.container table tr td, .container table tr th{
+.container table tr td,
+.container table tr th {
     text-align: center;
 }
-.container table tr td button:hover {           
+
+.container table tr td button:hover {
     background-color: #0056b3;
 }
+
 .container table tr td button.delete {
     background-color: #dc3545;
 }
+
 .container table tr td button.delete:hover {
     background-color: #c82333;
 }
+
 .container table tr td button.edit {
     background-color: #ffc107;
 }
+
 .container table tr td button.edit:hover {
     background-color: #e0a800;
 }
+
 .container table tr td button.add {
     background-color: #28a745;
 }
 
 .popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 /* Overlay */
 .overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10;
 }
 
 /* Popup Form */
 .popup-form {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  z-index: 20;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 20;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
 }
 
 .popup-form h2 {
-  margin-bottom: 1.2rem;
-  font-size: 1.4rem;
+    margin-bottom: 1.2rem;
+    font-size: 1.4rem;
 }
 
 .popup-form input {
-  display: block;
-  width: 100%;
-  margin-bottom: 0.8rem;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
+    display: block;
+    width: 100%;
+    margin-bottom: 0.8rem;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
 }
 
 .popup-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 .popup-buttons button {
-  flex: 1;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 #save-student {
-  background-color: #28a745;
-  color: white;
+    background-color: #28a745;
+    color: white;
 }
 
 #cancel-student {
-  background-color: #f44336;
-  color: white;
+    background-color: #f44336;
+    color: white;
 }
 
 .hidden {
-  display: none;
+    display: none;
 }
 
 tr.editing {
     background-color: #e0e0e0;
+}
+
+/*statistics*/
+.statistics.container {}
+
+.statistics {
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.statistics>* {
+    display: flex;
+    flex-basis: 1;
+}
+
+.statistics .simple-data {
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.statistics .major-header {
+    margin-bottom: 20px;
+}
+
+.statistics .major-count {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 
@@ -246,7 +295,7 @@ tr.editing {
 /* .popup .popup-content .btn:hover {
     background-color: var(--hover-color);
 } */
-  
+
 
 
 @media (max-width: 992px) {
@@ -254,16 +303,28 @@ tr.editing {
         width: 90%;
         padding: 10px;
     }
+
+    .statistics>* {
+        flex-direction: column;
+    }
+
+    .statistics .simple-data .avg-gpa {
+        margin: 20px 0 0;
+    }
+
     .input {
         flex-direction: column;
     }
+
     .input input {
         width: 100%;
         margin-bottom: 10px;
     }
+
     .input button {
         width: 100%;
     }
+
     .container table {
         font-size: 12px;
     }

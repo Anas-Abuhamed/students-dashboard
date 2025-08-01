@@ -21,17 +21,15 @@
         <div class="popup-form hidden" id="student-popup">
             <form>
                 <h2>Add New Student</h2>
-                <input type="text" id="student-name" placeholder="Name" required />
-                <input type="text" id="student-gpa" placeholder="GPA" required />
-                <input type="text" id="student-major" placeholder="Major" required />
+                <input name="name" type="text" id="student-name" placeholder="Name" required />
+                <input name="gpa" type="text" id="student-gpa" placeholder="GPA" required />
+                <input name="major" type="text" id="student-major" placeholder="Major" required />
                 <div class="popup-buttons">
                     <button type="submit" id="save-student">Save</button>
-                    <button type="button"  id="cancel-student">Cancel</button>
+                    <button type="button" id="cancel-student">Cancel</button>
                 </div>
             </form>
         </div>
-
-
         <table>
             <thead>
                 <tr>
@@ -44,6 +42,19 @@
             <tbody>
             </tbody>
         </table>
+        <hr>
+    </div>
+    <div class="container">
+        <h2>Statistics</h2>
+        <div class="statistics">
+            <div class="simple-data">
+                <h4 class="students-number">Number of Students: <span></span></h4>
+                <h4 class="avg-gpa">Average GPA: <span></span></h4>
+            </div>
+            <h4 class="major-header">Count Per Major:</h4>
+            <div class="major-count">
+            </div>
+        </div>
     </div>
     <div class="confirm-popup">
     </div>
