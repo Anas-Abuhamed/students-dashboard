@@ -13,8 +13,16 @@ let deleteBtns;
 let isEditing = false;
 let editIndex = null;
 let updatingElement;
-// display students for 1st time
-displayStudents();
+// Sort and filter elements by, variables:
+let sortValue = document.querySelector(".sort-input .select-list");
+let currentSort = sortValue.value;
+const gpaConditionSelect = document.querySelector(".filter-input .select-list");
+const gpaThresholdInput = document.querySelector(".gpa-threshold");
+const resetBtn = document.querySelector(".reset-button")
+
+
+// display students for 1st time base on sort value
+applyCurrentSortAndFilterThenDisplay()
 // Open add student popup
 function showPopup() {
     popup.classList.remove("hidden");
@@ -85,7 +93,7 @@ form.addEventListener("submit", (e) => {
             if (confirm) {
                 students[indexToEdit] = editedStudent;
                 saveStudentsToLocalStorage();
-                displayStudents();
+                applyCurrentSortAndFilterThenDisplay()
                 updatingElement = null
             }
             else {
@@ -107,14 +115,14 @@ form.addEventListener("submit", (e) => {
         };
         students.push(newStudent);
         saveStudentsToLocalStorage();
-        displayStudents();
+        applyCurrentSortAndFilterThenDisplay()
         hidePopup();
     }
 
 });
 
 // Display students in the table
-function displayStudents() {
+function displayStudents(students) {
     const tableBody = document.querySelector("tbody");
     tableBody.innerHTML = "";
     students.forEach((student) => {
@@ -237,3 +245,66 @@ function showConfirmPopup(message, callback) {
 
     document.addEventListener("keydown", handleKey);
 }
+
+// Sort functionality
+// filter functionality
+sortValue.addEventListener("change", (e) => {
+    currentSort = sortValue.value;
+    applyCurrentSortAndFilterThenDisplay()
+})
+gpaThresholdInput.addEventListener("input", applyCurrentSortAndFilterThenDisplay);
+gpaConditionSelect.addEventListener("change", applyCurrentSortAndFilterThenDisplay);
+function applyCurrentSortAndFilterThenDisplay() {
+    let filtered = [...students];
+    const condition = gpaConditionSelect.value;
+    const threshold = parseFloat(gpaThresholdInput.value);
+    if (condition === "all") {
+        gpaThresholdInput.disabled = true;
+        gpaThresholdInput.value = ""
+    }
+    else {
+        gpaThresholdInput.disabled = false
+    }
+    if (!isNaN(threshold)) {
+        if (condition === "above") {
+            filtered = filtered.filter(student => student.gpa > threshold);
+        } else if (condition === "below") {
+            filtered = filtered.filter(student => student.gpa < threshold);
+        }
+    }
+    if (currentSort === "name") {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (currentSort === "gpa") {
+        filtered.sort((a, b) => b.gpa - a.gpa);
+    }
+
+    displayStudents(filtered);
+}
+resetBtn.addEventListener("click", (e) => {
+    resetFilters();
+})
+function resetFilters() {
+    sortValue.value = "default";
+    gpaConditionSelect.value = "all";
+    gpaThresholdInput.value = "";
+    gpaThresholdInput.disabled = true;
+    currentSort = "default";
+    applyCurrentSortAndFilterThenDisplay();
+}
+
+
+function exportToJSON() {
+    const dataStr = JSON.stringify(students, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "students.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+

@@ -1,3 +1,23 @@
+:root {
+    --primary-green: #28a745;
+    --primary-green-dark: #218838;
+    --danger-red: #f44336;
+    --danger-red-dark: #d32f2f;
+    --blue: #007bff;
+    --blue-dark: #0056b3;
+    --yellow: #ffc107;
+    --yellow-dark: #e0a800;
+    --delete-red: #dc3545;
+    --delete-red-dark: #c82333;
+    --gray-light: #f8f8f8;
+    --gray-medium: #f2f2f2;
+    --gray-hover: #f1f1f1;
+    --gray-alt-1: #f9f9f9;
+    --gray-alt-2: #ffffff;
+    --edit-bg: #e0e0e0;
+    --overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -6,12 +26,12 @@
 
 .container {
     width: 70%;
-    margin: 50px auto;
-    padding: 40px 20px;
+    margin: 40px auto 20px;
+    padding: 20px;
     display: flex;
     align-items: center;
     flex-direction: column;
-    background-color: #f8f8f8;
+    background-color: var(--gray-light);
     border-radius: 12px;
 }
 
@@ -40,14 +60,14 @@
 }
 
 .input input:focus {
-    border-color: #218838;
+    border-color: var(--primary-green-dark);
     outline: none;
-    box-shadow: 0 0 5px #218838;
+    box-shadow: 0 0 5px var(--primary-green-dark);
 }
 
 .input button {
     padding: 10px 20px;
-    background-color: #28a745;
+    background-color: var(--primary-green);
     color: white;
     border: none;
     border-radius: 6px;
@@ -58,11 +78,67 @@
 
 .input button:focus {
     outline: none;
-    box-shadow: 0 0 5px #218838;
+    box-shadow: 0 0 5px var(--primary-green-dark);
 }
 
 .input button:hover {
-    background-color: #218838;
+    background-color: var(--primary-green-dark);
+}
+
+.sort-filter {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.sort-input,
+.filter-input {
+    flex-basis: 45%;
+    display: flex;
+    align-items: center;
+}
+
+.select-list {
+    margin-left: 5px;
+}
+
+.select-list,
+.filter-input .gpa-threshold {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid;
+}
+
+.filter-input .gpa-threshold {
+    margin-left: 10px;
+    flex: 1;
+}
+
+.filter-input .gpa-threshold:focus {
+    outline: none;
+}
+
+.reset {
+    width: 100%;
+    text-align: end;
+}
+
+.reset-button,
+.to-json-button {
+    padding: 6px 12px;
+    background-color: var(--danger-red);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.reset-button:hover {
+    background-color: var(--danger-red-dark);
 }
 
 .container table th,
@@ -73,19 +149,19 @@
 }
 
 .container table th {
-    background-color: #f2f2f2;
+    background-color: var(--gray-medium);
 }
 
 .container table tr:hover {
-    background-color: #f1f1f1 !important;
+    background-color: var(--gray-hover) !important;
 }
 
 .container table tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: var(--gray-alt-1);
 }
 
 .container table tr:nth-child(odd) {
-    background-color: #ffffff;
+    background-color: var(--gray-alt-2);
 }
 
 .container table tr td:last-child {
@@ -94,7 +170,7 @@
 
 .container table tr td button {
     padding: 5px 10px;
-    background-color: #007bff;
+    background-color: var(--blue);
     color: white;
     border: none;
     border-radius: 4px;
@@ -108,54 +184,48 @@
 }
 
 .container table tr td button:hover {
-    background-color: #0056b3;
+    background-color: var(--blue-dark);
 }
 
 .container table tr td button.delete {
-    background-color: #dc3545;
+    background-color: var(--delete-red);
 }
 
 .container table tr td button.delete:hover {
-    background-color: #c82333;
+    background-color: var(--delete-red-dark);
 }
 
 .container table tr td button.edit {
-    background-color: #ffc107;
+    background-color: var(--yellow);
 }
 
 .container table tr td button.edit:hover {
-    background-color: #e0a800;
+    background-color: var(--yellow-dark);
 }
 
 .container table tr td button.add {
-    background-color: #28a745;
+    background-color: var(--primary-green);
 }
 
-.popup-overlay {
+.popup-overlay,
+.overlay,
+.confirm-popup {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background-color: var(--overlay-bg);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
 
-/* Overlay */
 .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
     z-index: 10;
 }
 
-/* Popup Form */
 .popup-form {
     position: fixed;
     top: 50%;
@@ -164,7 +234,7 @@
     background: white;
     padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 25px var(--overlay-bg);
     z-index: 20;
     width: 90%;
     max-width: 400px;
@@ -202,12 +272,12 @@
 }
 
 #save-student {
-    background-color: #28a745;
+    background-color: var(--primary-green);
     color: white;
 }
 
 #cancel-student {
-    background-color: #f44336;
+    background-color: var(--danger-red);
     color: white;
 }
 
@@ -216,11 +286,8 @@
 }
 
 tr.editing {
-    background-color: #e0e0e0;
+    background-color: var(--edit-bg);
 }
-
-/*statistics*/
-.statistics.container {}
 
 .statistics {
     padding: 10px;
@@ -249,27 +316,12 @@ tr.editing {
     justify-content: space-between;
 }
 
-
-.confirm-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #cccccc3b;
-    justify-content: center;
-    align-items: center;
-    z-index: 2;
-    display: none;
-}
-
 .confirm-popup-content {
-    background-color: #fff;
+    background-color: white;
     padding: 30px 40px;
     border-radius: 10px;
     text-align: center;
     font-size: 20px;
-    /* box-shadow: 0 0 15px var(--box-shadow); */
 }
 
 .confirm-popup.show {
@@ -278,7 +330,6 @@ tr.editing {
 
 .confirm-popup .confirm-popup-content .btn {
     padding: 10px 15px;
-    background-color: #0056b3;
     color: white;
     border-radius: 6px;
     border: none;
@@ -288,15 +339,14 @@ tr.editing {
     transition: 0.3s;
 }
 
-.confirm-popup .confirm-popup-content .btn:last-of-type {
-    margin-left: 10px;
+.confirm-popup .confirm-popup-content .btn:first-of-type {
+    background-color: var(--delete-red-dark);
 }
 
-/* .popup .popup-content .btn:hover {
-    background-color: var(--hover-color);
-} */
-
-
+.confirm-popup .confirm-popup-content .btn:last-of-type {
+    background-color: var(--primary-green);
+    margin-left: 10px;
+}
 
 @media (max-width: 992px) {
     .container {

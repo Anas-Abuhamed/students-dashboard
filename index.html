@@ -16,6 +16,29 @@
             <input type="text" placeholder="Search Student..." id="search-input" />
             <button id="open-popup">Add Student</button>
         </div>
+        <div class="sort-filter">
+            <div class="sort-input">
+                <label>Sort by:</label>
+                <select class="select-list">
+                    <option value="default" selected>history addition</option>
+                    <option value="name">Name</option>
+                    <option value="gpa">GPA</option>
+                </select>
+            </div>
+            <div class="filter-input">
+                <label>GPA Filter:</label>
+                <select class="select-list">
+                    <option value="all" selected>All</option>
+                    <option value="above">Above</option>
+                    <option value="below">Below</option>
+                </select>
+                <input type="number" min="0" max="4" step="0.01" placeholder="GPA Threshold" class="gpa-threshold">
+            </div>
+            <div class="reset">
+                <button class="to-json-button" onclick="exportToJSON()">Export to JSON</button>
+                <button class="reset-button">Reset Filters</button>
+            </div>
+        </div>
         <div class="overlay hidden"></div>
 
         <div class="popup-form hidden" id="student-popup">
@@ -25,8 +48,8 @@
                 <input name="gpa" type="text" id="student-gpa" placeholder="GPA" required />
                 <input name="major" type="text" id="student-major" placeholder="Major" required />
                 <div class="popup-buttons">
-                    <button type="submit" id="save-student">Save</button>
                     <button type="button" id="cancel-student">Cancel</button>
+                    <button type="submit" id="save-student">Save</button>
                 </div>
             </form>
         </div>
