@@ -20,6 +20,8 @@ const gpaConditionSelect = document.querySelector(".filter-input .select-list");
 const gpaThresholdInput = document.querySelector(".gpa-threshold");
 const resetBtn = document.querySelector(".reset-button")
 
+let gpaChartV;
+
 
 // display students for 1st time base on sort value
 applyCurrentSortAndFilterThenDisplay()
@@ -151,6 +153,7 @@ function displayStudents(students) {
         editBtn.addEventListener("click", editStudent);
     });
     showStatistics();
+    gpaChart(students);
 }
 // show Statistics
 function showStatistics() {
@@ -305,6 +308,48 @@ function exportToJSON() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+
+function getGPA(students) {
+    const counters = [0, 0, 0, 0]
+    students.forEach((student) => {
+        if (student.gpa >= 0 && student.gpa < 1) counters[0]++;
+        else if (student.gpa >= 1 && student.gpa < 2) counters[1]++;
+        else if (student.gpa >= 2 && student.gpa < 3) counters[2]++;
+        else if (student.gpa >= 3 && student.gpa <= 4) counters[3]++;
+    })
+    return counters;
+}
+
+function gpaChart(students) {
+    const ctx = document.getElementById("gpa-chart");
+    if (gpaChartV) gpaChartV.destroy();
+    gpaChartV = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["0-1", "1-2", "2-3", "3-4"],
+            datasets: [{
+                label: "gpa degree",
+                data: getGPA(students),
+                backgroundColor: ["rgba(255, 99, 132, 0.6)",
+                    "rgba(255, 206, 86, 0.6)",
+                    "rgba(75, 192, 192, 0.6)",
+                    "rgba(54, 162, 235, 0.6)"],
+                borderColor: ["rgba(255, 99, 132, 1)",
+                    "rgba(255, 206, 86, 1)",
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(54, 162, 235, 1)"],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    })
 }
 
 
