@@ -24,6 +24,7 @@
     padding: 0;
 }
 
+
 .container {
     width: 70%;
     margin: 40px auto 20px;
@@ -94,7 +95,6 @@
     margin-bottom: 20px;
 }
 
-.sort-input,
 .filter-input {
     flex-basis: 45%;
     display: flex;
@@ -141,15 +141,33 @@
     background-color: var(--danger-red-dark);
 }
 
+.reset-button:disabled {
+    background-color: var(--blue-dark);
+    cursor: not-allowed;
+    color: var(--edit-bg);
+}
+
 .container table th,
 .container table td {
     padding: 12px;
-    text-align: left;
     border-bottom: 1px solid #ddd;
+    text-align: center;
 }
 
 .container table th {
     background-color: var(--gray-medium);
+}
+
+.container table th i {
+    font-size: 12px;
+    color: var(--overlay-bg);
+    cursor: pointer;
+    transition: 0.3s;
+    margin-left: 5px;
+}
+
+.container table th i.flipped {
+    transform: rotate(180deg);
 }
 
 .container table tr:hover {
@@ -178,11 +196,6 @@
     transition: 0.3s;
 }
 
-.container table tr td,
-.container table tr th {
-    text-align: center;
-}
-
 .container table tr td button:hover {
     background-color: var(--blue-dark);
 }
@@ -195,6 +208,10 @@
     background-color: var(--delete-red-dark);
 }
 
+.container table tr td button.delete:focus {
+    outline: none;
+}
+
 .container table tr td button.edit {
     background-color: var(--yellow);
 }
@@ -203,27 +220,41 @@
     background-color: var(--yellow-dark);
 }
 
+.container table tr td button.edit {
+    outline: none;
+}
+
 .container table tr td button.add {
     background-color: var(--primary-green);
 }
 
-.popup-overlay,
-.overlay,
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
 .confirm-popup {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--overlay-bg);
-    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 25;
+    display: none;
 }
 
 .overlay {
-    z-index: 10;
+    z-index: 22;
+    background-color: var(--overlay-bg);
+    backdrop-filter: blur(10px);
 }
 
 .popup-form {
@@ -239,6 +270,7 @@
     width: 90%;
     max-width: 400px;
     text-align: center;
+    z-index: 2000;
 }
 
 .popup-form h2 {
@@ -274,6 +306,12 @@
 #save-student {
     background-color: var(--primary-green);
     color: white;
+}
+
+#save-student:disabled {
+    background-color: var(--primary-green-dark);
+    color: var(--edit-bg);
+    cursor: not-allowed;
 }
 
 #cancel-student {

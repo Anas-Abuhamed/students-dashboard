@@ -17,14 +17,14 @@
             <button id="open-popup">Add Student</button>
         </div>
         <div class="sort-filter">
-            <div class="sort-input">
+            <!-- <div class="sort-input">
                 <label>Sort by:</label>
                 <select class="select-list">
                     <option value="default" selected>history addition</option>
                     <option value="name">Name</option>
                     <option value="gpa">GPA</option>
                 </select>
-            </div>
+            </div> -->
             <div class="filter-input">
                 <label>GPA Filter:</label>
                 <select class="select-list">
@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="overlay hidden"></div>
-
+        <div class="confirm-popup"></div>
         <div class="popup-form hidden" id="student-popup">
             <form>
                 <h2>Add New Student</h2>
@@ -56,9 +56,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>GPA</th>
-                    <th>Major</th>
+                    <th>Name <i class="fas fa-chevron-down name"></i></th>
+                    <th>GPA <i class="fas fa-chevron-down gpa"></i></th>
+                    <th>Major <i class="fas fa-chevron-down major"></i></th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -81,8 +81,6 @@
     </div>
     <div class="container">
         <canvas id="gpa-chart" width="400" height="200" aria-label="Hello ARIA World" role="img"></canvas>
-    </div>
-    <div class="confirm-popup">
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/index.js"></script>

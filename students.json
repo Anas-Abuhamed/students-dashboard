@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1754131816550,
+    "name": "mohammed",
+    "gpa": 4,
+    "major": "physics"
+  },
+  {
+    "id": 1754131800935,
+    "name": "zaid",
+    "gpa": 4,
+    "major": "computer science"
+  },
+  {
+    "id": 1754131859502,
+    "name": "anas",
+    "gpa": 2.3,
+    "major": "chemistry"
+  },
+  {
+    "id": 1754132066526,
+    "name": "ahmed",
+    "gpa": 2.5,
+    "major": "computer science"
+  },
+  {
+    "id": 1754158547224,
+    "name": "amer",
+    "gpa": 1.5,
+    "major": "cs"
+  },
+  {
+    "id": 1754158570008,
+    "name": "kareem",
+    "gpa": 1.2,
+    "major": "chemistry"
+  },
+  {
+    "id": 1754158856184,
+    "name": "hamed",
+    "gpa": 0.8,
+    "major": "cs"
+  },
+  {
+    "id": 1754159312798,
+    "name": "moath",
+    "gpa": 3.5,
+    "major": "cs"
+  },
+  {
+    "id": 1754210508256,
+    "name": "qusai",
+    "gpa": 2.8,
+    "major": "cs"
+  },
+  {
+    "id": 1754210971990,
+    "name": "qusai jaradat",
+    "gpa": 2.9,
+    "major": "phisycs"
+  }
+]

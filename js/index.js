@@ -1,46 +1,71 @@
+// En & ar, (valid en & ar)
+// global btns
+// global edit informations
+// Sort and filter elements by, variables:
 const popup = document.getElementById("student-popup");
 const overlay = document.querySelector(".overlay");
 const searchInput = document.getElementById("search-input");
 const popupForm = document.querySelector(".popup-form")
 const form = popupForm.querySelector("form");
+const formInputs = popupForm.querySelectorAll("form input");
 const cancelBtn = document.getElementById("cancel-student");
 const addStudentBtn = document.getElementById("open-popup");
-let students = getStudentsFromLocalStorage();
-// global btns
-let editBtns;
-let deleteBtns;
-// global edit informations
-let isEditing = false;
-let editIndex = null;
-let updatingElement;
-// Sort and filter elements by, variables:
-let sortValue = document.querySelector(".sort-input .select-list");
-let currentSort = sortValue.value;
+const addSaveBtn = document.querySelector("#save-student");
+const tableBody = document.querySelector("tbody");
+let sortIcons = document.querySelectorAll(".container table th i");
 const gpaConditionSelect = document.querySelector(".filter-input .select-list");
 const gpaThresholdInput = document.querySelector(".gpa-threshold");
 const resetBtn = document.querySelector(".reset-button")
+const sortValues = Object.freeze({
+    DEFAULT: "default",
+    NAME: "name",
+    GPA: "gpa",
+    MAJOR: "major"
+})
 
+const filterValues = Object.freeze({
+    ALL: "all",
+    ABOVE: "above",
+    BELOW: "below"
+})
+let nameAscending = true;
+let gpaAscending = true;
+let majorAscending = true;
+let students;
+let deleteBtns;
+let editBtns;
+let isEditing = false;
+let editIndex = null;
+let updatingElement;
+let currentSort = sortValues.DEFAULT;
 let gpaChartV;
 
+//
 
 // display students for 1st time base on sort value
-applyCurrentSortAndFilterThenDisplay()
+init()
+async function init() {
+    students = await getStudentsFromLocalStorage();
+    applyCurrentSortAndFilterThenDisplay();
+}
 // Open add student popup
 function showPopup() {
     popup.classList.remove("hidden");
     overlay.classList.remove("hidden");
     document.getElementById("student-name").focus();
+    checkInputs();
 }
 
 function hidePopup() {
     popup.classList.add("hidden");
     overlay.classList.add("hidden");
+    popupForm.classList.add("hidden")
     form.reset();
     isEditing = false;
     editIndex = null;
 }
 popupForm.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && checkInputs()) {
         form.requestSubmit();
     } else if (e.key === "Escape") {
         hidePopup();
@@ -66,6 +91,26 @@ function search() {
 }
 
 // Add student functionality
+
+function checkInputs() {
+    let allFilled = true;
+    formInputs.forEach(input => {
+        if (input.getAttribute("id") == "student-gpa") {
+            if (isNaN(input.value) || parseFloat(input.value) < 0 || parseFloat(input.value) > 4)
+                allFilled = false;
+        }
+        if (input.value.trim() === "") {
+            allFilled = false;
+        }
+    });
+
+    addSaveBtn.disabled = !allFilled;
+}
+
+formInputs.forEach(input => {
+    input.addEventListener("input", checkInputs);
+});
+
 form.addEventListener("submit", (e) => {
     e.preventDefault();
     const name = document.getElementById("student-name").value.trim();
@@ -125,7 +170,6 @@ form.addEventListener("submit", (e) => {
 
 // Display students in the table
 function displayStudents(students) {
-    const tableBody = document.querySelector("tbody");
     tableBody.innerHTML = "";
     students.forEach((student) => {
         const row = document.createElement("tr");
@@ -197,13 +241,23 @@ function deleteStudent(e, confirmed) {
         saveStudentsToLocalStorage();
         showStatistics()
     }
+    else {
+        overlay.classList.add("hidden")
+    }
 }
 
 // Get and set students in local storage
-
-function getStudentsFromLocalStorage() {
+// read from local storage if it's empty
+async function getStudentsFromLocalStorage() {
     const students = localStorage.getItem("students");
-    return students ? JSON.parse(students) : [];
+    // return students ? JSON.parse(students) : [];
+    if (students) {
+        return JSON.parse(students)
+    }
+    const result = await fetch("students.json");
+    const data = await result.json();
+    localStorage.setItem("students", JSON.stringify(data));
+    return data
 }
 function saveStudentsToLocalStorage() {
     localStorage.setItem("students", JSON.stringify(students));
@@ -211,6 +265,7 @@ function saveStudentsToLocalStorage() {
 
 // confirmation popup
 function showConfirmPopup(message, callback) {
+    overlay.classList.remove("hidden")
     // popup for add & delete confirmation
     const popup = document.querySelector(".confirm-popup");
     popup.innerHTML = `
@@ -232,6 +287,8 @@ function showConfirmPopup(message, callback) {
         popup.classList.remove("show");
         document.removeEventListener("keydown", handleKey);
         callback(result);
+        if (result)
+            overlay.classList.add("hidden")
     }
 
     cancelBtn.onclick = () => close(false);
@@ -251,17 +308,37 @@ function showConfirmPopup(message, callback) {
 
 // Sort functionality
 // filter functionality
-sortValue.addEventListener("change", (e) => {
-    currentSort = sortValue.value;
-    applyCurrentSortAndFilterThenDisplay()
-})
 gpaThresholdInput.addEventListener("input", applyCurrentSortAndFilterThenDisplay);
 gpaConditionSelect.addEventListener("change", applyCurrentSortAndFilterThenDisplay);
+sortIcons.forEach((sortIcon) => {
+    sortIcon.addEventListener("click", (e) => {
+        sortIcon.classList.add("flipped")
+        if (sortIcon.classList.contains(sortValues.NAME)) {
+            currentSort = sortValues.NAME;
+            nameAscending = !nameAscending
+        }
+        else if (sortIcon.classList.contains(sortValues.GPA)) {
+            currentSort = sortValues.GPA;
+            gpaAscending = !gpaAscending
+        }
+        else if (sortIcon.classList.contains(sortValues.MAJOR)) {
+            currentSort = sortValues.MAJOR;
+            majorAscending = !majorAscending
+        }
+        sortIcons.forEach((icon) => {
+            if (icon.className !== sortIcon.className)
+                icon.classList.remove("flipped")
+        })
+        applyCurrentSortAndFilterThenDisplay();
+    })
+}
+)
 function applyCurrentSortAndFilterThenDisplay() {
+    resetBtn.disabled = false;
     let filtered = [...students];
     const condition = gpaConditionSelect.value;
     const threshold = parseFloat(gpaThresholdInput.value);
-    if (condition === "all") {
+    if (condition === filterValues.ALL) {
         gpaThresholdInput.disabled = true;
         gpaThresholdInput.value = ""
     }
@@ -269,32 +346,57 @@ function applyCurrentSortAndFilterThenDisplay() {
         gpaThresholdInput.disabled = false
     }
     if (!isNaN(threshold)) {
-        if (condition === "above") {
+        if (condition === filterValues.ABOVE) {
             filtered = filtered.filter(student => student.gpa > threshold);
-        } else if (condition === "below") {
+        } else if (condition === filterValues.BELOW) {
             filtered = filtered.filter(student => student.gpa < threshold);
         }
     }
-    if (currentSort === "name") {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (currentSort === "gpa") {
-        filtered.sort((a, b) => b.gpa - a.gpa);
+    if (currentSort === sortValues.NAME) {
+        filtered = sortByField(filtered, sortValues.NAME, nameAscending)
+    } else if (currentSort === sortValues.GPA) {
+        filtered = sortByField(filtered, sortValues.GPA, gpaAscending)
+    }
+    else if (currentSort === sortValues.MAJOR) {
+        filtered = sortByField(filtered, sortValues.MAJOR, majorAscending)
     }
 
     displayStudents(filtered);
+    updateResetBtnState()
 }
+function sortByField(arr, field, ascending) {
+    return arr.sort((a, b) => {
+        if (field === sortValues.GPA) return ascending ? a.gpa - b.gpa : b.gpa - a.gpa;
+        return ascending
+            ? a[field].localeCompare(b[field])
+            : b[field].localeCompare(a[field]);
+    });
+}
+
+// RESET BUTTON AND CHECKER
+
 resetBtn.addEventListener("click", (e) => {
     resetFilters();
 })
+
 function resetFilters() {
-    sortValue.value = "default";
-    gpaConditionSelect.value = "all";
+    currentSort = sortValues.DEFAULT;
+    gpaConditionSelect.value = filterValues.ALL;
     gpaThresholdInput.value = "";
     gpaThresholdInput.disabled = true;
-    currentSort = "default";
+    currentSort = sortValues.DEFAULT;
+    resetBtn.disabled = true;
+    sortIcons.forEach(sortIcon => { sortIcon.classList.remove("flipped") })
     applyCurrentSortAndFilterThenDisplay();
 }
 
+function updateResetBtnState() {
+    const isSortDefault = currentSort === sortValues.DEFAULT;
+    const isFilterDefault = gpaConditionSelect.value === filterValues.ALL && gpaThresholdInput.value.trim() === "";
+    resetBtn.disabled = isSortDefault && isFilterDefault;
+}
+
+// JSON EXPORT
 
 function exportToJSON() {
     const dataStr = JSON.stringify(students, null, 2);
@@ -310,13 +412,27 @@ function exportToJSON() {
     URL.revokeObjectURL(url);
 }
 
+// CHART
+
 function getGPA(students) {
     const counters = [0, 0, 0, 0]
     students.forEach((student) => {
-        if (student.gpa >= 0 && student.gpa < 1) counters[0]++;
-        else if (student.gpa >= 1 && student.gpa < 2) counters[1]++;
-        else if (student.gpa >= 2 && student.gpa < 3) counters[2]++;
-        else if (student.gpa >= 3 && student.gpa <= 4) counters[3]++;
+        let gpa = parseFloat(student.gpa);
+        // switch
+        switch (true) {
+            case gpa < 1:
+                counters[0]++;
+                break
+            case gpa < 2:
+                counters[1]++;
+                break
+            case gpa < 3:
+                counters[2]++
+                break;
+            default:
+                counters[3]++
+                break;
+        }
     })
     return counters;
 }
@@ -351,5 +467,7 @@ function gpaChart(students) {
         }
     })
 }
+
+
 
 
