@@ -2,6 +2,11 @@
 // global btns
 // global edit informations
 // Sort and filter elements by, variables:
+document.addEventListener('DOMContentLoaded', async function () {
+    loadLanguagePreference();
+    setupLanguageToggle();
+    await init();
+});
 const popup = document.getElementById("student-popup");
 const overlay = document.querySelector(".overlay");
 const searchInput = document.getElementById("search-input");
@@ -39,11 +44,170 @@ let editIndex = null;
 let updatingElement;
 let currentSort = sortValues.DEFAULT;
 let gpaChartV;
+let currentLanguage = 'en';
 
 //
+const translations = {
+    ar: {
+        title: "لوحة تحكم الطلاب",
+        header: "لوحة تحكم الطلاب",
+        arabic: "العربية",
+        english: "الإنجليزية",
+        search_placeholder: "ابحث عن طالب...",
+        add_student_btn: "إضافة طالب",
+        gpa_filter: "تصفية المعدل:",
+        all: "الكل",
+        above: "أعلى من",
+        below: "أقل من",
+        gpa_threshold_placeholder: "حد المعدل",
+        export_json: "تصدير JSON",
+        reset_filters: "إعادة التصفية",
+        add_student_header: "إضافة طالب جديد",
+        name_placeholder: "الاسم",
+        gpa_placeholder: "المعدل",
+        major_placeholder: "التخصص",
+        cancel_btn: "إلغاء",
+        save_btn: "حفظ",
+        name_header: "الاسم",
+        gpa_header: "المعدل",
+        major_header: "التخصص",
+        actions_header: "الإجراءات",
+        statistics: "إحصائيات",
+        number_of_students: "عدد الطلاب:",
+        avg_gpa: "متوسط المعدل:",
+        count_per_major: "عدد الطلاب لكل تخصص:"
+    },
+    en: {
+        title: "Students Dashboard",
+        header: "Students Dashboard",
+        arabic: "Arabic",
+        english: "English",
+        search_placeholder: "Search Student...",
+        add_student_btn: "Add Student",
+        gpa_filter: "GPA Filter:",
+        all: "All",
+        above: "Above",
+        below: "Below",
+        gpa_threshold_placeholder: "GPA Threshold",
+        export_json: "Export to JSON",
+        reset_filters: "Reset Filters",
+        add_student_header: "Add New Student",
+        name_placeholder: "Name",
+        gpa_placeholder: "GPA",
+        major_placeholder: "Major",
+        cancel_btn: "Cancel",
+        save_btn: "Save",
+        name_header: "Name",
+        gpa_header: "GPA",
+        major_header: "Major",
+        actions_header: "Actions",
+        statistics: "Statistics",
+        number_of_students: "Number of Students:",
+        avg_gpa: "Average GPA:",
+        count_per_major: "Count Per Major:"
+    }
+};
+
+async function changeLanguage(lang) {
+    currentLanguage = lang;
+    // Update all translatable elements
+    document.querySelectorAll("[data-translate]").forEach((el) => {
+        const key = el.dataset.translate;
+        if (translations[lang] && translations[lang][key]) {
+            el.innerHTML = translations[lang][key];
+        }
+    });
+
+    // Update placeholders
+    document.querySelectorAll("input[data-translate]").forEach((el) => {
+        const key = el.dataset.translate;
+        if (translations[lang] && translations[lang][key]) {
+            el.placeholder = translations[lang][key];
+        }
+    });
+
+    // Update page title
+    if (translations[lang].title) {
+        document.title = translations[lang].title;
+    }
+
+    // Update page direction
+    updatePageDirection();
+
+    // Save language preference
+    localStorage.setItem('preferredLanguage', lang);
+    students = await getStudentsFromLocalStorage()
+    applyCurrentSortAndFilterThenDisplay();
+    resetFilters()
+
+}
+
+// Update page direction for RTL/LTR support
+function updatePageDirection() {
+    const body = document.body;
+    const html = document.documentElement;
+
+    if (currentLanguage === 'ar') {
+        html.setAttribute('dir', 'rtl');
+        html.setAttribute('lang', 'ar');
+        body.style.textAlign = 'right';
+    } else {
+        html.setAttribute('dir', 'ltr');
+        html.setAttribute('lang', 'en');
+        body.style.textAlign = 'left';
+    }
+}
+
+// Load saved language preference
+function loadLanguagePreference() {
+    const savedLang = localStorage.getItem('preferredLanguage');
+    if (savedLang && translations[savedLang]) {
+        currentLanguage = savedLang;
+        document.getElementById(savedLang).checked = true;
+        document.getElementById(savedLang === 'ar' ? 'en' : 'ar').checked = false;
+        changeLanguage(currentLanguage);
+    }
+    else {
+        localStorage.setItem("preferredLanguage", "en");
+        document.getElementById("en").checked = true
+        currentLanguage = "en";
+        changeLanguage(currentLanguage);
+    }
+}
+
+// Fixed event listeners for language toggles
+function setupLanguageToggle() {
+    const arCheckbox = document.getElementById("ar");
+    const enCheckbox = document.getElementById("en");
+
+    arCheckbox.addEventListener("change", function () {
+        if (this.checked) {
+            enCheckbox.checked = false;
+            changeLanguage("ar");
+        } else {
+            // If unchecked and English is not checked, default to English
+            if (!enCheckbox.checked) {
+                enCheckbox.checked = true;
+                changeLanguage("en");
+            }
+        }
+    });
+
+    enCheckbox.addEventListener("change", function () {
+        if (this.checked) {
+            arCheckbox.checked = false;
+            changeLanguage("en");
+        } else {
+            // If unchecked and Arabic is not checked, default to English
+            if (!arCheckbox.checked) {
+                this.checked = true;
+                changeLanguage("en");
+            }
+        }
+    });
+}
 
 // display students for 1st time base on sort value
-init()
 async function init() {
     students = await getStudentsFromLocalStorage();
     applyCurrentSortAndFilterThenDisplay();
@@ -94,14 +258,25 @@ function search() {
 
 function checkInputs() {
     let allFilled = true;
+    let englishLettersPattern = /^[A-Za-z\s]+$/
+    let arabicLettersPattern = /^[\u0600-\u06FF\s]+$/
+
     formInputs.forEach(input => {
+        let value = input.value.trim();
+        if (value === "") {
+            allFilled = false;
+        }
         if (input.getAttribute("id") == "student-gpa") {
             if (isNaN(input.value) || parseFloat(input.value) < 0 || parseFloat(input.value) > 4)
                 allFilled = false;
         }
-        if (input.value.trim() === "") {
+        else if (currentLanguage == "en" && !englishLettersPattern.test(value)) {
             allFilled = false;
         }
+        else if (currentLanguage == "ar" && !arabicLettersPattern.test(value)) {
+            allFilled = false;
+        }
+
     });
 
     addSaveBtn.disabled = !allFilled;
@@ -136,7 +311,7 @@ form.addEventListener("submit", (e) => {
             gpa,
             major,
         };
-        showConfirmPopup("Are you sure want to edit this student's information ?", (confirm) => {
+        showConfirmPopup(currentLanguage == "en" ? "Are you sure want to edit this student ?" : "هل أنت متأكد أنك تريد تعديل هذا الطالب", (confirm) => {
             if (confirm) {
                 students[indexToEdit] = editedStudent;
                 saveStudentsToLocalStorage();
@@ -189,7 +364,7 @@ function displayStudents(students) {
         const deleteBtn = row.querySelector(".delete");
         // deleteBtn.addEventListener("click", deleteStudent);
         deleteBtn.addEventListener("click", (e) => {
-            showConfirmPopup("Are you sure want to delete this student ?", (confirm) => deleteStudent(e, confirm))
+            showConfirmPopup(currentLanguage == "en" ? "Are you sure want to delete this student ?" : "هل أنت متأكد أنك تريد حذف هذا الطالب", (confirm) => deleteStudent(e, confirm))
         }
         );
         // Add event listeners for edit button
@@ -207,8 +382,8 @@ function showStatistics() {
     students.forEach(student => {
         majorCount[student.major] = (majorCount[student.major] || 0) + 1;
     })
-    document.querySelector(".students-number span").textContent = total;
-    document.querySelector(".avg-gpa span").textContent = avgGPA;
+    document.querySelector(".students-number + span").textContent = total;
+    document.querySelector(".avg-gpa + span").textContent = avgGPA;
     document.querySelector(".major-count").innerHTML = ""
     for (const major in majorCount) {
         document.querySelector(".major-count").innerHTML += `<p>${major} : ${majorCount[major]}</p>`
@@ -249,18 +424,25 @@ function deleteStudent(e, confirmed) {
 // Get and set students in local storage
 // read from local storage if it's empty
 async function getStudentsFromLocalStorage() {
-    const students = localStorage.getItem("students");
-    // return students ? JSON.parse(students) : [];
-    if (students) {
-        return JSON.parse(students)
-    }
-    const result = await fetch("students.json");
-    const data = await result.json();
-    localStorage.setItem("students", JSON.stringify(data));
-    return data
+    let students = await setJSONFile(`students-${currentLanguage}`, `students-${currentLanguage}.json`)
+    return await JSON.parse(students)
 }
 function saveStudentsToLocalStorage() {
-    localStorage.setItem("students", JSON.stringify(students));
+    localStorage.setItem(`students-${currentLanguage}`, JSON.stringify(students));
+}
+
+async function setJSONFile(localStorageItemName, JSONFileName) {
+    const students = localStorage.getItem(localStorageItemName);
+    let data;
+    if (students) {
+        return students;
+    }
+    else {
+        const result = await fetch(JSONFileName);
+        data = await result.json();
+        localStorage.setItem(localStorageItemName, JSON.stringify(data));
+    }
+    return JSON.stringify(data);
 }
 
 // confirmation popup
@@ -272,8 +454,8 @@ function showConfirmPopup(message, callback) {
     <div class="confirm-popup-overlay">
         <div class="confirm-popup-content">
         <p>${message}</p>
-        <button class="cancel btn">Cancel</button>
-        <button class="confirm btn">Confirm</button>
+        <button class="cancel btn">${currentLanguage == "en" ? "Cancel" : "إلغاء"}</button>
+        <button class="confirm btn">${currentLanguage == "en" ? "Confirm" : "تأكيد"}</button>
     </div>
     </div>
     `;
@@ -312,7 +494,7 @@ gpaThresholdInput.addEventListener("input", applyCurrentSortAndFilterThenDisplay
 gpaConditionSelect.addEventListener("change", applyCurrentSortAndFilterThenDisplay);
 sortIcons.forEach((sortIcon) => {
     sortIcon.addEventListener("click", (e) => {
-        sortIcon.classList.add("flipped")
+        sortIcon.classList.toggle("flipped")
         if (sortIcon.classList.contains(sortValues.NAME)) {
             currentSort = sortValues.NAME;
             nameAscending = !nameAscending
@@ -326,7 +508,7 @@ sortIcons.forEach((sortIcon) => {
             majorAscending = !majorAscending
         }
         sortIcons.forEach((icon) => {
-            if (icon.className !== sortIcon.className)
+            if (icon !== sortIcon)
                 icon.classList.remove("flipped")
         })
         applyCurrentSortAndFilterThenDisplay();
@@ -445,7 +627,7 @@ function gpaChart(students) {
         data: {
             labels: ["0-1", "1-2", "2-3", "3-4"],
             datasets: [{
-                label: "gpa degree",
+                label: currentLanguage === "en" ? "GPA degree" : "درجة المعدل",
                 data: getGPA(students),
                 backgroundColor: ["rgba(255, 99, 132, 0.6)",
                     "rgba(255, 206, 86, 0.6)",
@@ -461,12 +643,17 @@ function gpaChart(students) {
         options: {
             scales: {
                 y: {
-                    beginAtZero: true
-                }
+                    beginAtZero: true,
+                },
             }
         }
     })
 }
+
+
+
+
+
 
 
 
