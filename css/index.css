@@ -45,6 +45,10 @@
     margin-bottom: 50px;
 }
 
+.language {
+    margin-bottom: 10px
+}
+
 .input {
     width: 100%;
     display: flex;
