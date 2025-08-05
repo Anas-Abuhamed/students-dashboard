@@ -1,8 +1,12 @@
-// En & ar, (valid en & ar)
+// React basics, react state events, react components, react hooks
 // global btns
 // global edit informations
 // Sort and filter elements by, variables:
+// i18n
+// Add event listeners for language toggles
+// Cookie
 document.addEventListener('DOMContentLoaded', async function () {
+    await main();
     loadLanguagePreference();
     setupLanguageToggle();
     await init();
@@ -21,6 +25,7 @@ let sortIcons = document.querySelectorAll(".container table th i");
 const gpaConditionSelect = document.querySelector(".filter-input .select-list");
 const gpaThresholdInput = document.querySelector(".gpa-threshold");
 const resetBtn = document.querySelector(".reset-button")
+const JSONExportBtn = document.querySelector(".to-json-button");
 const sortValues = Object.freeze({
     DEFAULT: "default",
     NAME: "name",
@@ -45,82 +50,30 @@ let updatingElement;
 let currentSort = sortValues.DEFAULT;
 let gpaChartV;
 let currentLanguage = 'en';
+// // converted to JSON
+let translations;
+async function main() {
+    translations = await getTranslations();
+}
 
-//
-const translations = {
-    ar: {
-        title: "لوحة تحكم الطلاب",
-        header: "لوحة تحكم الطلاب",
-        arabic: "العربية",
-        english: "الإنجليزية",
-        search_placeholder: "ابحث عن طالب...",
-        add_student_btn: "إضافة طالب",
-        gpa_filter: "تصفية المعدل:",
-        all: "الكل",
-        above: "أعلى من",
-        below: "أقل من",
-        gpa_threshold_placeholder: "حد المعدل",
-        export_json: "تصدير JSON",
-        reset_filters: "إعادة التصفية",
-        add_student_header: "إضافة طالب جديد",
-        name_placeholder: "الاسم",
-        gpa_placeholder: "المعدل",
-        major_placeholder: "التخصص",
-        cancel_btn: "إلغاء",
-        save_btn: "حفظ",
-        name_header: "الاسم",
-        gpa_header: "المعدل",
-        major_header: "التخصص",
-        actions_header: "الإجراءات",
-        statistics: "إحصائيات",
-        number_of_students: "عدد الطلاب:",
-        avg_gpa: "متوسط المعدل:",
-        count_per_major: "عدد الطلاب لكل تخصص:"
-    },
-    en: {
-        title: "Students Dashboard",
-        header: "Students Dashboard",
-        arabic: "Arabic",
-        english: "English",
-        search_placeholder: "Search Student...",
-        add_student_btn: "Add Student",
-        gpa_filter: "GPA Filter:",
-        all: "All",
-        above: "Above",
-        below: "Below",
-        gpa_threshold_placeholder: "GPA Threshold",
-        export_json: "Export to JSON",
-        reset_filters: "Reset Filters",
-        add_student_header: "Add New Student",
-        name_placeholder: "Name",
-        gpa_placeholder: "GPA",
-        major_placeholder: "Major",
-        cancel_btn: "Cancel",
-        save_btn: "Save",
-        name_header: "Name",
-        gpa_header: "GPA",
-        major_header: "Major",
-        actions_header: "Actions",
-        statistics: "Statistics",
-        number_of_students: "Number of Students:",
-        avg_gpa: "Average GPA:",
-        count_per_major: "Count Per Major:"
-    }
-};
-
+async function getTranslations() {
+    const result = await fetch('translations.json');
+    const data = await result.json();
+    return data;
+}
 async function changeLanguage(lang) {
     currentLanguage = lang;
     // Update all translatable elements
-    document.querySelectorAll("[data-translate]").forEach((el) => {
-        const key = el.dataset.translate;
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+        const key = el.dataset.i18n;
         if (translations[lang] && translations[lang][key]) {
-            el.innerHTML = translations[lang][key];
+            el.textContent = translations[lang][key];
         }
     });
 
     // Update placeholders
-    document.querySelectorAll("input[data-translate]").forEach((el) => {
-        const key = el.dataset.translate;
+    document.querySelectorAll("input[data-i18n]").forEach((el) => {
+        const key = el.dataset.i18n;
         if (translations[lang] && translations[lang][key]) {
             el.placeholder = translations[lang][key];
         }
@@ -135,7 +88,8 @@ async function changeLanguage(lang) {
     updatePageDirection();
 
     // Save language preference
-    localStorage.setItem('preferredLanguage', lang);
+    document.cookie = `preferredLanguage=${lang}; path=/; max-age=3600`; // 1 hour expiration
+    currentLanguage = document.cookie.split("=")[1] || "en";
     students = await getStudentsFromLocalStorage()
     applyCurrentSortAndFilterThenDisplay();
     resetFilters()
@@ -160,27 +114,33 @@ function updatePageDirection() {
 
 // Load saved language preference
 function loadLanguagePreference() {
-    const savedLang = localStorage.getItem('preferredLanguage');
+    const savedLang = document.cookie.split("=")[1];
+    const otherLang = savedLang === 'ar' ? 'en' : 'ar';
     if (savedLang && translations[savedLang]) {
         currentLanguage = savedLang;
-        document.getElementById(savedLang).checked = true;
         document.getElementById(savedLang === 'ar' ? 'en' : 'ar').checked = false;
-        changeLanguage(currentLanguage);
+        document.getElementById(savedLang === 'ar' ? 'ar' : 'en').checked = true;
     }
     else {
         localStorage.setItem("preferredLanguage", "en");
         document.getElementById("en").checked = true
         currentLanguage = "en";
-        changeLanguage(currentLanguage);
     }
+    changeLanguage(currentLanguage);
 }
 
 // Fixed event listeners for language toggles
 function setupLanguageToggle() {
     const arCheckbox = document.getElementById("ar");
     const enCheckbox = document.getElementById("en");
+    currentLanguage == "ar" ? arCheckbox.previousElementSibling.style.display = 'none' : enCheckbox.previousElementSibling.style.display = 'none';
+    currentLanguage == "ar" ? arCheckbox.style.display = 'none' : enCheckbox.style.display = 'none';
 
     arCheckbox.addEventListener("change", function () {
+        this.previousElementSibling.style.display = 'none';
+        this.style.display = 'none';
+        enCheckbox.previousElementSibling.style.display = 'inline-block';
+        enCheckbox.style.display = 'inline-block';
         if (this.checked) {
             enCheckbox.checked = false;
             changeLanguage("ar");
@@ -194,6 +154,10 @@ function setupLanguageToggle() {
     });
 
     enCheckbox.addEventListener("change", function () {
+        this.previousElementSibling.style.display = 'none';
+        this.style.display = 'none';
+        arCheckbox.previousElementSibling.style.display = 'inline-block';
+        arCheckbox.style.display = 'inline-block';
         if (this.checked) {
             arCheckbox.checked = false;
             changeLanguage("en");
@@ -237,7 +201,12 @@ popupForm.addEventListener("keydown", (e) => {
 })
 cancelBtn.addEventListener("click", hidePopup);
 overlay.addEventListener("click", hidePopup);
-addStudentBtn.addEventListener("click", showPopup);
+addStudentBtn.addEventListener("click", () => {
+    showPopup();
+    const popupTitle = document.querySelector(".popup-title");
+    popupTitle.textContent = translations[currentLanguage]["add_student_header"];
+}
+);
 
 // Search functionality
 searchInput.addEventListener("input", () => {
@@ -256,11 +225,35 @@ function search() {
 
 // Add student functionality
 
-function checkInputs() {
+function checkInputs(changedInput) {
     let allFilled = true;
-    let englishLettersPattern = /^[A-Za-z\s]+$/
-    let arabicLettersPattern = /^[\u0600-\u06FF\s]+$/
+    let englishLettersPattern = /^[A-Za-z0-9\s]+$/
+    let arabicLettersPattern = /^[\u0600-\u06FF0-9\s]+$/
+    if (changedInput) {
 
+        const value = changedInput.value.trim();
+        if (changedInput.getAttribute("id") === "student-gpa") {
+            if (isNaN(value) || parseFloat(value) < 0 || parseFloat(value) > 4) {
+                showToast(translations[currentLanguage]["gpa_validation_error"]);
+                changedInput.value = value.slice(0, -1);
+            }
+            else {
+                addSaveBtn.disabled = true;
+            }
+        } else {
+            // Name and Major validation
+            if (currentLanguage === "en" && !englishLettersPattern.test(changedInput.value)) {
+                changedInput.value = changedInput.value.split('').filter((char) => englishLettersPattern.test(char)).join(''); // Remove last character if invalid
+                showToast(translations[currentLanguage]["text_validation_error"]);
+            } else if (currentLanguage === "ar" && !arabicLettersPattern.test(changedInput.value)) {
+                changedInput.value = changedInput.value.split('').filter((char) => arabicLettersPattern.test(char)).join('');
+                showToast(translations[currentLanguage]["text_validation_error"]);
+            }
+            else {
+                addSaveBtn.disabled = true;
+            }
+        }
+    }
     formInputs.forEach(input => {
         let value = input.value.trim();
         if (value === "") {
@@ -276,15 +269,28 @@ function checkInputs() {
         else if (currentLanguage == "ar" && !arabicLettersPattern.test(value)) {
             allFilled = false;
         }
-
     });
 
     addSaveBtn.disabled = !allFilled;
 }
 
-formInputs.forEach(input => {
-    input.addEventListener("input", checkInputs);
+formInputs.forEach(inputs => {
+    inputs.addEventListener("input", (e) => {
+        checkInputs(e.target)
+    }
+    );
 });
+function showToast(message, duration = 1500) {
+    const toast = document.querySelector('.toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    toast.classList.remove('hidden');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hidden');
+    }, duration);
+}
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -295,11 +301,11 @@ form.addEventListener("submit", (e) => {
         (student) => student.name === name
     );
     if (isUpdatedNameExist != -1 && isUpdatedNameExist != editIndex) {
-        alert("name already exist !");
+        showToast(translations[currentLanguage]["name_exists"]);
         return;
     }
     if (isNaN(gpa) || gpa < 0 || gpa > 4) {
-        alert("Please enter a valid GPA between 0 and 4.");
+        showToast(translations[currentLanguage]["gpa_validation_error"]);
         return;
     }
     if (isEditing) {
@@ -311,7 +317,7 @@ form.addEventListener("submit", (e) => {
             gpa,
             major,
         };
-        showConfirmPopup(currentLanguage == "en" ? "Are you sure want to edit this student ?" : "هل أنت متأكد أنك تريد تعديل هذا الطالب", (confirm) => {
+        showConfirmPopup(translations[currentLanguage]["confirmation_edit"], (confirm) => {
             if (confirm) {
                 students[indexToEdit] = editedStudent;
                 saveStudentsToLocalStorage();
@@ -322,10 +328,11 @@ form.addEventListener("submit", (e) => {
                 editStudent(updatingElement)
             }
         })
+
     } else {
         const isNameExist = students.findIndex((student) => student.name === name);
         if (isNameExist !== -1) {
-            alert("Name already exists!");
+            showToast(translations[currentLanguage]["name_exists"]);
             return;
         }
 
@@ -345,34 +352,57 @@ form.addEventListener("submit", (e) => {
 
 // Display students in the table
 function displayStudents(students) {
-    tableBody.innerHTML = "";
+    tableBody.textContent = "";
+    const fragment = document.createDocumentFragment();
+
     students.forEach((student) => {
-        const row = document.createElement("tr");
-        row.classList.add("row");
-        row.setAttribute("data-id", student.id);
-        row.innerHTML = `
-            <td class="name">${student.name}</td>
-            <td class="gpa">${student.gpa.toFixed(2)}</td>
-            <td class="major">${student.major}</td>
-            <td class="actions">
-                <button class="edit"><i class="fas fa-edit"></i></button>
-                <button class="delete"><i class="fas fa-trash-alt"></i></button>
-            </td>
-        `;
-        tableBody.appendChild(row);
+        const row = createStudentRecord(student);
+        fragment.append(row);
         // Add event listeners for delete button
         const deleteBtn = row.querySelector(".delete");
-        // deleteBtn.addEventListener("click", deleteStudent);
         deleteBtn.addEventListener("click", (e) => {
-            showConfirmPopup(currentLanguage == "en" ? "Are you sure want to delete this student ?" : "هل أنت متأكد أنك تريد حذف هذا الطالب", (confirm) => deleteStudent(e, confirm))
-        }
-        );
+            showConfirmPopup(translations[currentLanguage]["confirmation_delete"], (confirm) => deleteStudent(e, confirm))
+        });
         // Add event listeners for edit button
         const editBtn = row.querySelector(".edit");
         editBtn.addEventListener("click", editStudent);
     });
+    tableBody.appendChild(fragment);
     showStatistics();
     gpaChart(students);
+}
+
+function createStudentRecord(student) {
+    const row = document.createElement("tr");
+    row.classList.add("row");
+    row.setAttribute("data-id", student.id);
+    const keys = ["name", "gpa", "major"];
+    keys.forEach(key => {
+        const cell = document.createElement("td");
+        cell.classList.add(key)
+        if (key === "gpa") {
+            cell.textContent = student[key].toFixed(2);
+        }
+        else {
+            cell.textContent = student[key];
+        }
+        row.append(cell);
+    })
+    const actionsCell = document.createElement("td");
+    actionsCell.classList.add("actions");
+    const editBtn = document.createElement("button");
+    editBtn.classList.add("edit");
+    let i = document.createElement("i");
+    i.classList.add("fas", "fa-edit");
+    editBtn.appendChild(i);
+    i = document.createElement("i");
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("delete");
+    i.classList.add("fas", "fa-trash-alt");
+    deleteBtn.appendChild(i);
+    actionsCell.append(editBtn, deleteBtn);
+    row.append(actionsCell);
+    return row;
 }
 // show Statistics
 function showStatistics() {
@@ -384,9 +414,11 @@ function showStatistics() {
     })
     document.querySelector(".students-number + span").textContent = total;
     document.querySelector(".avg-gpa + span").textContent = avgGPA;
-    document.querySelector(".major-count").innerHTML = ""
+    document.querySelector(".major-count").textContent = ""
     for (const major in majorCount) {
-        document.querySelector(".major-count").innerHTML += `<p>${major} : ${majorCount[major]}</p>`
+        const p = document.createElement("p");
+        p.textContent = `${major} : ${majorCount[major]}`
+        document.querySelector(".major-count").append(p);
     }
 }
 
@@ -397,12 +429,13 @@ function editStudent(e) {
     const id = row.getAttribute("data-id");
     const studentIndex = students.findIndex((student) => student.id == id);
     const student = students[studentIndex];
-
     document.getElementById("student-name").value = student.name;
     document.getElementById("student-gpa").value = student.gpa.toFixed(2);
     document.getElementById("student-major").value = student.major;
     isEditing = true;
     editIndex = studentIndex;
+    const popupTitle = document.querySelector(".popup-title");
+    popupTitle.textContent = translations[currentLanguage]["edit_student_header"];
     showPopup();
 }
 
@@ -446,19 +479,30 @@ async function setJSONFile(localStorageItemName, JSONFileName) {
 }
 
 // confirmation popup
+function createConfirmPopup(message) {
+    const overlayDiv = document.createElement("div");
+    overlayDiv.classList.add("confirm-popup-overlay");
+    const contentDiv = document.createElement("div")
+    contentDiv.classList.add("confirm-popup-content");
+    const p = document.createElement("p");
+    p.textContent = message;
+    const cancelConfirmBtn = document.createElement("button");
+    cancelConfirmBtn.classList.add("cancel", "btn");
+    cancelConfirmBtn.textContent = translations[currentLanguage]["cancel_btn"];
+    const addConfirmBtn = document.createElement("button");
+    addConfirmBtn.classList.add("confirm", "btn");
+    addConfirmBtn.textContent = translations[currentLanguage]["confirm_btn"];
+    contentDiv.append(p, cancelConfirmBtn, addConfirmBtn);
+    overlayDiv.append(contentDiv);
+    return overlayDiv;
+}
 function showConfirmPopup(message, callback) {
     overlay.classList.remove("hidden")
     // popup for add & delete confirmation
     const popup = document.querySelector(".confirm-popup");
-    popup.innerHTML = `
-    <div class="confirm-popup-overlay">
-        <div class="confirm-popup-content">
-        <p>${message}</p>
-        <button class="cancel btn">${currentLanguage == "en" ? "Cancel" : "إلغاء"}</button>
-        <button class="confirm btn">${currentLanguage == "en" ? "Confirm" : "تأكيد"}</button>
-    </div>
-    </div>
-    `;
+    const createPopup = createConfirmPopup(message);
+    popup.textContent = "";
+    popup.append(createPopup);
     popup.classList.add("show");
 
     const cancelBtn = popup.querySelector(".cancel");
@@ -513,8 +557,7 @@ sortIcons.forEach((sortIcon) => {
         })
         applyCurrentSortAndFilterThenDisplay();
     })
-}
-)
+})
 function applyCurrentSortAndFilterThenDisplay() {
     resetBtn.disabled = false;
     let filtered = [...students];
@@ -579,7 +622,7 @@ function updateResetBtnState() {
 }
 
 // JSON EXPORT
-
+JSONExportBtn.addEventListener("click", exportToJSON);
 function exportToJSON() {
     const dataStr = JSON.stringify(students, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
@@ -627,7 +670,7 @@ function gpaChart(students) {
         data: {
             labels: ["0-1", "1-2", "2-3", "3-4"],
             datasets: [{
-                label: currentLanguage === "en" ? "GPA degree" : "درجة المعدل",
+                label: translations[currentLanguage]["chart_btn"],
                 data: getGPA(students),
                 backgroundColor: ["rgba(255, 99, 132, 0.6)",
                     "rgba(255, 206, 86, 0.6)",
@@ -645,16 +688,25 @@ function gpaChart(students) {
                 y: {
                     beginAtZero: true,
                 },
-            }
+                x: {
+                    beginAtZero: true,
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            family: 'Arial',
+                            size: 16
+                        }
+                    }
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
         }
     })
 }
-
-
-
-
-
-
-
-
-

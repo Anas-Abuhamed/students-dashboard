@@ -49,6 +49,7 @@
     margin-bottom: 10px
 }
 
+
 .input {
     width: 100%;
     display: flex;
@@ -105,7 +106,7 @@
 }
 
 .select-list {
-    margin-left: 5px;
+    margin: 0 5px;
 }
 
 .select-list,
@@ -191,12 +192,12 @@
 
 .container table tr td button {
     padding: 5px 10px;
-    background-color: var(--blue);
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: 0.3s;
+    margin: 5px;
 }
 
 
@@ -224,13 +225,10 @@
     background-color: var(--yellow-dark);
 }
 
-.container table tr td button.edit {
+.container table tr td button {
     outline: none;
 }
 
-.container table tr td button.add {
-    background-color: var(--primary-green);
-}
 
 .overlay {
     position: fixed;
@@ -313,7 +311,7 @@
 }
 
 #save-student:disabled {
-    background-color: var(--primary-green-dark);
+    background-color: var(--blue-dark);
     color: var(--edit-bg);
     cursor: not-allowed;
 }
@@ -367,7 +365,7 @@ tr.editing {
 }
 
 .confirm-popup.show {
-    display: flex !important;
+    display: flex;
 }
 
 .confirm-popup .confirm-popup-content .btn {
@@ -420,4 +418,28 @@ tr.editing {
     .container table {
         font-size: 12px;
     }
+}
+
+
+.toast {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--overlay-bg);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    user-select: none;
+    min-width: 200px;
+    text-align: center;
+    z-index: 10000;
+}
+
+.toast.show {
+    opacity: 1;
 }

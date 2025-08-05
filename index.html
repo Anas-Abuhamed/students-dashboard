@@ -6,41 +6,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/all.min.css" />
     <link rel="stylesheet" href="css/index.css" />
-    <title data-translate="title">Students Dashboard</title>
+    <title data-i18n="title">Students Dashboard</title>
 </head>
 
 <body>
     <div class="container">
-        <h2 class="header" data-translate="header">Students Dashboard</h2>
+        <h2 class="header" data-i18n="header">Students Dashboard</h2>
 
         <div class="language">
-            <label for="ar" data-translate="arabic">Arabic</label>
+            <label for="ar" data-i18n="arabic">Arabic</label>
             <input type="checkbox" name="ar" id="ar">
-            <label for="en" data-translate="english">English</label>
+            <label for="en" data-i18n="english">English</label>
             <input type="checkbox" name="en" id="en">
         </div>
 
         <div class="input">
-            <input type="text" placeholder="Search Student..." id="search-input" data-translate="search_placeholder" />
-            <button id="open-popup" data-translate="add_student_btn">Add Student</button>
+            <input type="text" placeholder="Search Student..." id="search-input" data-i18n="search_placeholder" />
+            <button id="open-popup" data-i18n="add_student_btn">Add Student</button>
         </div>
 
         <div class="sort-filter">
             <div class="filter-input">
-                <label data-translate="gpa_filter">GPA Filter:</label>
+                <label data-i18n="gpa_filter">GPA Filter:</label>
                 <select class="select-list">
-                    <option value="all" selected data-translate="all">All</option>
-                    <option value="above" data-translate="above">Above</option>
-                    <option value="below" data-translate="below">Below</option>
+                    <option value="all" selected data-i18n="all">All</option>
+                    <option value="above" data-i18n="above">Above</option>
+                    <option value="below" data-i18n="below">Below</option>
                 </select>
                 <input type="number" min="0" max="4" step="0.01" placeholder="GPA Threshold" class="gpa-threshold"
-                    data-translate="gpa_threshold_placeholder">
+                    data-i18n="gpa_threshold_placeholder">
 
             </div>
             <div class="reset">
-                <button class="to-json-button" onclick="exportToJSON()" data-translate="export_json">Export to
+                <button class="to-json-button" data-i18n="export_json">Export to
                     JSON</button>
-                <button class="reset-button" data-translate="reset_filters">Reset Filters</button>
+                <button class="reset-button" data-i18n="reset_filters">Reset Filters</button>
             </div>
         </div>
 
@@ -49,16 +49,15 @@
 
         <div class="popup-form hidden" id="student-popup">
             <form>
-                <h2 data-translate="add_student_header">Add New Student</h2>
+                <h2 data-i18n="add_student_header" class="popup-title">Add New Student</h2>
                 <input name="name" type="text" id="student-name" placeholder="Name" required
-                    data-translate="name_placeholder" />
-                <input name="gpa" type="text" id="student-gpa" placeholder="GPA" required
-                    data-translate="gpa_placeholder" />
+                    data-i18n="name_placeholder" />
+                <input name="gpa" type="text" id="student-gpa" placeholder="GPA" required data-i18n="gpa_placeholder" />
                 <input name="major" type="text" id="student-major" placeholder="Major" required
-                    data-translate="major_placeholder" />
+                    data-i18n="major_placeholder" />
                 <div class="popup-buttons">
-                    <button type="button" id="cancel-student" data-translate="cancel_btn">Cancel</button>
-                    <button type="submit" id="save-student" data-translate="save_btn">Save</button>
+                    <button type="button" id="cancel-student" data-i18n="cancel_btn">Cancel</button>
+                    <button type="submit" id="save-student" data-i18n="save_btn">Save</button>
                 </div>
             </form>
         </div>
@@ -68,39 +67,40 @@
                 <tr>
                     <th>
                         <div class="header-container">
-                            <p data-translate="name_header">name</p> <i class="fas fa-chevron-down name"></i>
+                            <p data-i18n="name_header">name</p> <i class="fas fa-chevron-down name"></i>
                         </div>
                     </th>
 
                     <th>
                         <div class="header-container">
-                            <p data-translate="gpa_header">gpa</p> <i class="fas fa-chevron-down gpa"></i>
+                            <p data-i18n="gpa_header">gpa</p> <i class="fas fa-chevron-down gpa"></i>
                         </div>
                     </th>
                     <th>
                         <div class="header-container">
-                            <p data-translate="major_header">major</p> <i class="fas fa-chevron-down major"></i>
+                            <p data-i18n="major_header">major</p> <i class="fas fa-chevron-down major"></i>
                         </div>
                     </th>
-                    <th data-translate="actions_header">Actions</th>
+                    <th data-i18n="actions_header">Actions</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+            </tbody>
         </table>
 
         <hr>
     </div>
 
     <div class="container">
-        <h2 data-translate="statistics">Statistics</h2>
+        <h2 data-i18n="statistics">Statistics</h2>
         <div class="statistics">
             <div class="simple-data">
-                <h4 class="students-number" data-translate="number_of_students">Number of Students:</h4>
+                <h4 class="students-number" data-i18n="number_of_students">Number of Students:</h4>
                 <span></span>
-                <h4 class="avg-gpa" data-translate="avg_gpa">Average GPA:</h4>
+                <h4 class="avg-gpa" data-i18n="avg_gpa">Average GPA:</h4>
                 <span></span>
             </div>
-            <h4 class="major-header" data-translate="count_per_major">Count Per Major:</h4>
+            <h4 class="major-header" data-i18n="count_per_major">Count Per Major:</h4>
             <div class="major-count"></div>
         </div>
     </div>
@@ -108,6 +108,8 @@
     <div class="container">
         <canvas id="gpa-chart" width="400" height="200" aria-label="Hello ARIA World" role="img"></canvas>
     </div>
+    <div class="toast hidden"></div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/index.js"></script>
