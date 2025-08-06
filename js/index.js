@@ -7,10 +7,13 @@
 // Cookie
 document.addEventListener('DOMContentLoaded', async function () {
     await main();
-    loadLanguagePreference();
+    await loadLanguagePreference();
     setupLanguageToggle();
     await init();
 });
+if (window.location.pathname === "/" || window.location.pathname === "") {
+    location.replace("/pages/index.html");
+}
 const popup = document.getElementById("student-popup");
 const overlay = document.querySelector(".overlay");
 const searchInput = document.getElementById("search-input");
@@ -56,11 +59,39 @@ async function main() {
     translations = await getTranslations();
 }
 
-async function getTranslations() {
-    const result = await fetch('translations.json');
-    const data = await result.json();
-    return data;
+function debounce(func, delay) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
 }
+
+async function getTranslations() {
+    try {
+        const [enRes, arRes] = await Promise.all([
+            fetch('../locales/translations-en.json'),
+            fetch('../locales/translations-ar.json')
+        ]);
+
+        if (!enRes.ok || !arRes.ok) {
+            throw new Error("Failed to load translations");
+        }
+
+        const [enJson, arJson] = await Promise.all([
+            enRes.json(),
+            arRes.json()
+        ]);
+
+        return { en: enJson.en, ar: arJson.ar };
+    } catch (error) {
+        console.error("Error fetching translations:", error);
+        return {};
+    }
+}
+
 async function changeLanguage(lang) {
     currentLanguage = lang;
     // Update all translatable elements
@@ -89,11 +120,15 @@ async function changeLanguage(lang) {
 
     // Save language preference
     document.cookie = `preferredLanguage=${lang}; path=/; max-age=3600`; // 1 hour expiration
-    currentLanguage = document.cookie.split("=")[1] || "en";
+    currentLanguage = getCookie("preferredLanguage") || "en";
     students = await getStudentsFromLocalStorage()
     applyCurrentSortAndFilterThenDisplay();
-    resetFilters()
+    resetFilters();
+}
 
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
 }
 
 // Update page direction for RTL/LTR support
@@ -113,8 +148,8 @@ function updatePageDirection() {
 }
 
 // Load saved language preference
-function loadLanguagePreference() {
-    const savedLang = document.cookie.split("=")[1];
+async function loadLanguagePreference() {
+    const savedLang = getCookie("preferredLanguage");
     const otherLang = savedLang === 'ar' ? 'en' : 'ar';
     if (savedLang && translations[savedLang]) {
         currentLanguage = savedLang;
@@ -122,11 +157,10 @@ function loadLanguagePreference() {
         document.getElementById(savedLang === 'ar' ? 'ar' : 'en').checked = true;
     }
     else {
-        localStorage.setItem("preferredLanguage", "en");
         document.getElementById("en").checked = true
         currentLanguage = "en";
     }
-    changeLanguage(currentLanguage);
+    await changeLanguage(currentLanguage);
 }
 
 // Fixed event listeners for language toggles
@@ -209,9 +243,9 @@ addStudentBtn.addEventListener("click", () => {
 );
 
 // Search functionality
-searchInput.addEventListener("input", () => {
+searchInput.addEventListener("input", debounce(() => {
     search();
-});
+}, 300));
 function search() {
     const studentsName = document.querySelectorAll("tbody tr td.name");
     studentsName.forEach((name) => {
@@ -225,15 +259,19 @@ function search() {
 
 // Add student functionality
 
+function isValidName(value) {
+    return currentLanguage === "en"
+        ? /^[A-Za-z0-9\s]+$/.test(value)
+        : /^[\u0600-\u06FF0-9\s]+$/.test(value);
+}
+
 function checkInputs(changedInput) {
     let allFilled = true;
-    let englishLettersPattern = /^[A-Za-z0-9\s]+$/
-    let arabicLettersPattern = /^[\u0600-\u06FF0-9\s]+$/
     if (changedInput) {
 
         const value = changedInput.value.trim();
         if (changedInput.getAttribute("id") === "student-gpa") {
-            if (isNaN(value) || parseFloat(value) < 0 || parseFloat(value) > 4) {
+            if (!isValidGPA(value)) {
                 showToast(translations[currentLanguage]["gpa_validation_error"]);
                 changedInput.value = value.slice(0, -1);
             }
@@ -242,11 +280,11 @@ function checkInputs(changedInput) {
             }
         } else {
             // Name and Major validation
-            if (currentLanguage === "en" && !englishLettersPattern.test(changedInput.value)) {
-                changedInput.value = changedInput.value.split('').filter((char) => englishLettersPattern.test(char)).join(''); // Remove last character if invalid
+            if (currentLanguage === "en" && !isValidName(changedInput.value)) {
+                changedInput.value = changedInput.value.split('').filter((char) => isValidName(char)).join(''); // Remove last character if invalid
                 showToast(translations[currentLanguage]["text_validation_error"]);
-            } else if (currentLanguage === "ar" && !arabicLettersPattern.test(changedInput.value)) {
-                changedInput.value = changedInput.value.split('').filter((char) => arabicLettersPattern.test(char)).join('');
+            } else if (currentLanguage === "ar" && !isValidName(changedInput.value)) {
+                changedInput.value = changedInput.value.split('').filter((char) => isValidName(char)).join('');
                 showToast(translations[currentLanguage]["text_validation_error"]);
             }
             else {
@@ -263,10 +301,10 @@ function checkInputs(changedInput) {
             if (isNaN(input.value) || parseFloat(input.value) < 0 || parseFloat(input.value) > 4)
                 allFilled = false;
         }
-        else if (currentLanguage == "en" && !englishLettersPattern.test(value)) {
+        else if (currentLanguage == "en" && !isValidName(value)) {
             allFilled = false;
         }
-        else if (currentLanguage == "ar" && !arabicLettersPattern.test(value)) {
+        else if (currentLanguage == "ar" && !isValidName(value)) {
             allFilled = false;
         }
     });
@@ -291,6 +329,9 @@ function showToast(message, duration = 1500) {
         toast.classList.add('hidden');
     }, duration);
 }
+function isValidGPA(gpa) {
+    return !isNaN(gpa) && gpa >= 0 && gpa <= 4;
+}
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -304,7 +345,7 @@ form.addEventListener("submit", (e) => {
         showToast(translations[currentLanguage]["name_exists"]);
         return;
     }
-    if (isNaN(gpa) || gpa < 0 || gpa > 4) {
+    if (!isValidGPA(gpa)) {
         showToast(translations[currentLanguage]["gpa_validation_error"]);
         return;
     }
@@ -457,11 +498,17 @@ function deleteStudent(e, confirmed) {
 // Get and set students in local storage
 // read from local storage if it's empty
 async function getStudentsFromLocalStorage() {
-    let students = await setJSONFile(`students-${currentLanguage}`, `students-${currentLanguage}.json`)
+    let students = await setJSONFile(`students-${currentLanguage}`, `../students-data/students-${currentLanguage}.json`)
     return await JSON.parse(students)
 }
 function saveStudentsToLocalStorage() {
-    localStorage.setItem(`students-${currentLanguage}`, JSON.stringify(students));
+    try {
+        localStorage.setItem(`students-${currentLanguage}`, JSON.stringify(students));
+    }
+    catch (error) {
+        console.error("Error saving students to local storage:", error);
+        showToast("There was an error saving the data. Please try again.");
+    }
 }
 
 async function setJSONFile(localStorageItemName, JSONFileName) {
